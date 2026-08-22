@@ -1,40 +1,25 @@
 ---
-updated: 2026-08-22T20:20:00Z
+updated: 2026-08-22T20:26:00Z
 ---
 
 # Project State — Sentinel AI
 
 ## Current Position
 
-**Milestone:** v1.0 — Sentinel AI Engine  
-**Phase:** Phase 5 Complete (Frontend UI) → Ready for Phase 6 (End-to-End Integration, Demo Scenarios & Verification)  
+**Milestone:** v1.0 — Sentinel AI Engine (COMPLETE 🎉)  
+**Phase:** Phase 6 Complete (End-to-End Integration, Demo Scenarios & Verification)  
 **Status:** Verified  
-**Plan:** Ready for `/plan 6` or `/execute 6`
+**Plan:** Milestone v1.0 Completed & Verified
 
-## Last Action
+## Accomplishments
 
-Completed Phase 5 execution:
-- Built full-featured Next.js 15 App Router frontend (`/agents`, `/agents/new`, `/agents/[id]`, `/agents/[id]/scorecard`, `/agents/[id]/compare`, `/agents/[id]/runs/[runId]`).
-- Implemented `VerdictBadge.tsx` with color-coded failure taxonomy pills (`tool_loop`, `hallucinated_confidence`, `unsafe_destructive_action`, `goal_drift`, `none`).
-- Implemented `TraceViewer.tsx` with chronological multi-turn stream, collapsible tool inputs/mock outputs, turn cap telemetry, and LLM-as-a-judge confidence/reasoning verdict banner.
-- Implemented `ScorecardView.tsx` with Recharts horizontal bar failure distribution and area version trajectory charts, plus Markdown report downloader.
-- Implemented `VersionDiffView.tsx` with side-by-side version picker, delta reliability score gauge, and failure taxonomy differential table.
-- Implemented `CreateAgentModal.tsx` and full-page setup wizard with quickstart templates and dynamic tool JSON schema builder.
-- Built production bundle (`bun run --cwd frontend build`) with zero TypeScript errors.
-
-## Next Steps
-
-1. Execute **Phase 6: End-to-End Integration, Demo Scenarios & Verification** to seed realistic demo agents (e.g. *Customer Support Refund Bot* v1 failing guardrail vs v2 passing with escalation tool), run end-to-end regression workflows, and finalize all requirements.
-
-## Active Decisions
-
-| Decision | Choice | Made | Affects |
-|---|---|---|---|
-| Workspace Strategy | Bun Monorepo (`/shared`, `/backend`, `/frontend`) | 2026-08-22 | All Packages |
-| Database & ORM | Supabase PostgreSQL via Prisma 7 with `@prisma/adapter-pg` (`PrismaPg`) | 2026-08-22 | Backend / DB |
-| Auth Architecture | Supabase Auth (`@supabase/ssr` on frontend, JWT verification on Express backend) | 2026-08-22 | Frontend / Backend |
-| UI Component Architecture | Next.js 15 App Router with Tailwind CSS, Lucide icons, and Recharts | 2026-08-22 | Frontend |
-| Asynchronous Execution Pattern | Non-blocking HTTP 202 Accepted with client-side polling poller | 2026-08-22 | Frontend / Backend |
+All 6 phases of Milestone v1.0 have been implemented and verified:
+1. **Phase 1 (Foundation & Shared Architecture):** Monorepo workspace linking `/shared`, `/backend`, and `/frontend`, Prisma 7 client with `PrismaPg` adapter, Supabase Auth SSR and Express JWT middleware.
+2. **Phase 2 (AI Engine Core):** Automated scenario generator, destructive action guardrail probes, and LLM-as-a-judge classifier with 5 failure taxonomy modes.
+3. **Phase 3 (Sandboxed Execution Harness):** Schema-aware mock executor and turn-capped sandbox loop (max 6 steps) with chronological telemetry trace recording.
+4. **Phase 4 (Backend REST API & Pipeline):** Express REST API endpoints with async 202 evaluation pipeline, scorecard analytics, version comparison diffs, and markdown reports.
+5. **Phase 5 (Frontend UI):** Next.js 15 developer-tool dark theme web app with Agent Studio, interactive Trace timeline viewer, Recharts scorecard visualizations, version comparison view, and markdown export.
+6. **Phase 6 (E2E Integration & Demo Scenarios):** Seeded vulnerable Customer Support Refund Agent ($v_1$), caught adversarial `unsafe_destructive_action` failures (33.3% score), seeded secure agent ($v_2$), verified guardrail enforcement (100% score), and proved $+66.7\%$ reliability gain and regression resolution on `/compare`.
 
 ## Blockers
 

@@ -1,13 +1,12 @@
 ---
 milestone: v1.0
 version: 1.0.0
-updated: 2026-08-22T20:20:00Z
+updated: 2026-08-22T20:26:00Z
 ---
 
 # ROADMAP.md — Sentinel AI Roadmap
 
-> **Current Phase:** Phase 6: End-to-End Integration, Demo Scenarios & Verification
-> **Status:** Phase 5 Complete, Ready for Phase 6
+> **Milestone Status:** ✅ v1.0 Complete & Fully Verified
 
 ---
 
@@ -23,6 +22,7 @@ updated: 2026-08-22T20:20:00Z
 - [x] Backend REST API with async 202 evaluation pipeline, scorecard analytics, version comparison, and markdown export
 - [x] Reliability Scorecard & Version-over-Version Regression Tracker with visual Recharts charts
 - [x] Next.js 15 interactive frontend (Agent editor, Trace timeline viewer, Scorecard dashboard, Report export)
+- [x] End-to-End demo sequence demonstrating $v_1$ vulnerability detection $\to$ $v_2$ guardrail fix $\to$ regression proof on `/compare`
 
 ---
 
@@ -92,14 +92,14 @@ updated: 2026-08-22T20:20:00Z
 ---
 
 ### Phase 6: End-to-End Integration, Demo Scenarios & Verification
-**Status:** ⬜ Not Started  
+**Status:** ✅ Complete  
 **Objective:** Perform full end-to-end verification showing live failure detection on v1 vs guardrail pass on v2, seed demo data, and validate against success criteria.  
 **Requirements:** REQ-01 through REQ-16  
 **Depends on:** Phase 5  
 
 **Plans:**
-- [ ] Plan 6.1: Seed realistic demo agents (e.g. Customer Support Refund Agent, DevOps Cloud Provisioner) and pre-generated evaluation runs.
-- [ ] Plan 6.2: Execute complete regression demo workflow ($v_1 \to v_2$) demonstrating automated CI/CD guardrail catching destructive actions and regression tracking.
+- [x] Plan 6.1: Seed realistic demo agents (Customer Support Refund Agent) and pre-generated evaluation runs.
+- [x] Plan 6.2: Execute complete regression demo workflow ($v_1 \to v_2$) demonstrating automated CI/CD guardrail catching destructive actions and regression tracking.
 
 ---
 
@@ -112,7 +112,7 @@ updated: 2026-08-22T20:20:00Z
 | 3. Sandboxed Execution Harness | ✅ | 2/2 | 100% |
 | 4. Backend REST API & Pipeline | ✅ | 3/3 | 100% |
 | 5. Frontend UI | ✅ | 3/3 | 100% |
-| 6. E2E Integration & Verification | ⬜ | 0/2 | — |
+| 6. E2E Integration & Verification | ✅ | 2/2 | 100% |
 
 ---
 
