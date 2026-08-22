@@ -2,21 +2,29 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { getAgents, runEvaluation, pollEvaluationJob, type AgentSummary } from "@/lib/api";
+import {
+  getAgents,
+  runEvaluation,
+  pollEvaluationJob,
+  type AgentSummary,
+} from "@/lib/api";
 import { CreateAgentModal } from "@/components/CreateAgentModal";
 import {
   Bot,
   Plus,
   Play,
-  Activity,
   Layers,
-  ChevronRight,
+  Sparkles,
   Search,
+  RefreshCw,
+  Award,
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  Filter,
   CheckCircle2,
   AlertTriangle,
-  RefreshCw,
-  Sparkles,
-  ShieldAlert,
+  Zap,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -26,7 +34,9 @@ export default function AgentsPage() {
   const [search, setSearch] = useState("");
   const [domainFilter, setDomainFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [runningJobAgentId, setRunningJobAgentId] = useState<string | null>(null);
+  const [runningJobId, setRunningJobId] = useState<string | null>(null);
+  const [runningAgentId, setRunningAgentId] = useState<string | null>(null);
+  const [evalProgress, setEvalProgress] = useState<number>(0);
 
   const fetchAgents = async () => {
     try {
@@ -44,21 +54,32 @@ export default function AgentsPage() {
     fetchAgents();
   }, []);
 
-  const handleQuickRun = async (agentId: string, e: React.MouseEvent) => {
+  const handleQuickRun = async (e: React.MouseEvent, agentId: string) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (runningJobAgentId) return;
+    if (runningAgentId) return;
 
     try {
-      setRunningJobAgentId(agentId);
-      const { jobId } = await runEvaluation(agentId, { autoGenerateScenarios: true });
-      await pollEvaluationJob(jobId);
+      setRunningAgentId(agentId);
+      setEvalProgress(0);
+
+      const { jobId } = await runEvaluation(agentId, {
+        autoGenerateScenarios: true,
+      });
+      setRunningJobId(jobId);
+
+      await pollEvaluationJob(jobId, (job) => {
+        setEvalProgress(job.progressPercent);
+      });
+
       await fetchAgents();
     } catch (err) {
-      console.error("Quick run failed:", err);
+      console.error("Quick evaluation failed:", err);
     } finally {
-      setRunningJobAgentId(null);
+      setRunningAgentId(null);
+      setRunningJobId(null);
+      setEvalProgress(0);
     }
   };
 
@@ -69,202 +90,211 @@ export default function AgentsPage() {
       agent.name.toLowerCase().includes(search.toLowerCase()) ||
       agent.domain.toLowerCase().includes(search.toLowerCase()) ||
       (agent.description && agent.description.toLowerCase().includes(search.toLowerCase()));
+
     const matchesDomain = domainFilter === "all" || agent.domain === domainFilter;
     return matchesSearch && matchesDomain;
   });
 
-  // Calculate high level KPI totals
-  const totalAgents = agents.length;
-  const scoredAgents = agents.filter((a) => a.latestReliabilityScore !== null);
+  const totalEvaluations = agents.reduce((acc, a) => acc + (a.scenarioCount || 0), 0);
   const avgReliability =
-    scoredAgents.length > 0
-      ? Math.round(
-          scoredAgents.reduce((acc, a) => acc + (a.latestReliabilityScore || 0), 0) / scoredAgents.length
-        )
-      : null;
+    agents.length > 0
+      ? agents.reduce((acc, a) => acc + (a.latestReliabilityScore || 0), 0) / agents.length
+      : 100;
 
   return (
     <div className="space-y-8">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Bot className="w-7 h-7 text-cyan-400" /> Agent Reliability Studio
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Manage agent configurations, trigger sandboxed evaluations, and track regression scorecards.
-          </p>
-        </div>
+      {/* 1. Hero Header Banner */}
+      <div className="p-8 rounded-3xl glass-card border border-white/[0.08] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mb-20 pointer-events-none" />
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-semibold text-sm transition-all shadow-lg shadow-cyan-500/20"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" /> New Agent
-        </button>
-      </div>
-
-      {/* KPI Stats Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-          <div>
-            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">Registered Agents</span>
-            <div className="text-2xl font-bold text-white mt-1">{totalAgents}</div>
-          </div>
-          <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center text-cyan-400">
-            <Bot className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-          <div>
-            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">Average Reliability</span>
-            <div className="text-2xl font-bold text-emerald-400 mt-1">
-              {avgReliability !== null ? `${avgReliability}%` : "—"}
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono">
+              <Zap className="w-3.5 h-3.5" /> Autonomous AI Agent CI/CD Evaluation Harness
             </div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
+              Agent Studio & Continuous Verification
+            </h1>
+            <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
+              Synthesize adversarial scenarios, execute safe sandboxed turn loops, categorize failure taxonomy modes, and track reliability regressions version-over-version.
+            </p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-800/40 flex items-center justify-center text-emerald-400">
-            <CheckCircle2 className="w-5 h-5" />
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-zinc-950 font-bold text-xs flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(6,182,212,0.25)] hover:shadow-[0_0_25px_rgba(6,182,212,0.45)] active:scale-95"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Configure New Agent</span>
+            </button>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-          <div>
-            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">Total Versions Tracked</span>
-            <div className="text-2xl font-bold text-indigo-400 mt-1">
-              {agents.reduce((acc, a) => acc + (a.totalVersions || 1), 0)}
-            </div>
+        {/* Aggregate KPI Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/[0.06]">
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase text-zinc-500">Active Agents</span>
+            <div className="text-2xl font-bold font-mono text-white">{agents.length}</div>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/40 flex items-center justify-center text-indigo-400">
-            <Layers className="w-5 h-5" />
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase text-zinc-500">Test Scenarios</span>
+            <div className="text-2xl font-bold font-mono text-cyan-400">{totalEvaluations}</div>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase text-zinc-500">Mean Reliability</span>
+            <div className="text-2xl font-bold font-mono text-emerald-400">{avgReliability.toFixed(1)}%</div>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase text-zinc-500">Harness Guardrails</span>
+            <div className="text-2xl font-bold font-mono text-indigo-400">Max 6 Turns</div>
           </div>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      {/* 2. Filter & Search Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Search */}
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search agents by name, domain, or description..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            placeholder="Search agents, domains..."
+            className="w-full pl-9 pr-4 py-2 rounded-xl glass-input text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <select
-            value={domainFilter}
-            onChange={(e) => setDomainFilter(e.target.value)}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-300 focus:outline-none focus:border-cyan-500"
+        {/* Domain Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+          <button
+            onClick={() => setDomainFilter("all")}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
+              domainFilter === "all"
+                ? "bg-white/10 text-white border border-white/15 shadow-sm"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+            )}
           >
-            <option value="all">All Domains</option>
-            {domains.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+            All Domains ({agents.length})
+          </button>
+          {domains.map((dom) => (
+            <button
+              key={dom}
+              onClick={() => setDomainFilter(dom)}
+              className={clsx(
+                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
+                domainFilter === dom
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+              )}
+            >
+              {dom}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Agents Grid */}
+      {/* 3. Agents Grid */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-500 gap-3">
+        <div className="py-24 flex flex-col items-center justify-center text-zinc-500 gap-3">
           <RefreshCw className="w-6 h-6 animate-spin text-cyan-400" />
-          <span className="text-sm font-mono">Loading active agents...</span>
+          <span className="text-xs font-mono">Syncing agents from Supabase PostgreSQL...</span>
         </div>
       ) : filteredAgents.length === 0 ? (
-        <div className="py-16 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-900/30 space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 mx-auto">
-            <Bot className="w-6 h-6" />
-          </div>
-          <div className="text-base font-medium text-slate-300">No agents found</div>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+        <div className="py-20 text-center rounded-3xl glass-card border border-white/[0.08] p-8 space-y-4">
+          <Bot className="w-12 h-12 text-zinc-600 mx-auto" />
+          <h3 className="text-base font-bold text-white">No Agents Found</h3>
+          <p className="text-xs text-zinc-400 max-w-sm mx-auto">
             {search || domainFilter !== "all"
-              ? "Try adjusting your search or domain filter criteria."
-              : "Create your first agent configuration to begin running automated evaluations."}
+              ? "No agents matched your current filter criteria."
+              : "Create your first AI agent or apply a quickstart template to launch the continuous evaluation harness."}
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-semibold"
+            className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold text-xs inline-flex items-center gap-1.5"
           >
-            + Create Agent
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" /> Configure First Agent
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAgents.map((agent) => {
-            const isEvaluating = runningJobAgentId === agent.id;
-            const score = agent.latestReliabilityScore;
+            const isRunning = runningAgentId === agent.id;
+            const score = agent.latestReliabilityScore ?? 100;
+            const isHigh = score >= 85;
+            const isMed = score >= 60 && score < 85;
 
             return (
               <Link
                 key={agent.id}
                 href={`/agents/${agent.id}`}
-                className="group relative flex flex-col justify-between p-5 rounded-2xl bg-slate-900/70 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-lg hover:shadow-cyan-500/5 overflow-hidden"
+                className="group relative rounded-2xl glass-card border border-white/[0.08] hover:border-cyan-500/40 p-6 flex flex-col justify-between space-y-5 transition-all"
               >
-                <div className="space-y-4">
-                  {/* Top Badges */}
+                {/* Header */}
+                <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-                      {agent.domain}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-white/[0.08] text-zinc-300">
+                        {agent.domain}
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/70 text-cyan-400 border border-cyan-500/30">
+                        v{agent.latestVersion?.version || 1}
+                      </span>
+                    </div>
 
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
-                      v{agent.latestVersion?.version || 1}
+                    <span className="text-[11px] font-mono text-zinc-500">
+                      {agent.scenarioCount} Scenarios
                     </span>
                   </div>
 
-                  {/* Agent Title & Description */}
                   <div>
-                    <h3 className="font-semibold text-base text-slate-100 group-hover:text-cyan-300 transition-colors flex items-center justify-between">
+                    <h3 className="font-bold text-base text-white group-hover:text-cyan-300 transition-colors flex items-center justify-between">
                       <span>{agent.name}</span>
-                      <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
+                      <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                      {agent.description || "No description provided."}
+                    <p className="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
+                      {agent.description || "Autonomous agent configuration and guardrails."}
                     </p>
                   </div>
                 </div>
 
-                {/* Score & Quick Action Footer */}
-                <div className="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-slate-500 block">Reliability</span>
-                    {score !== null ? (
-                      <div className="flex items-center gap-1.5 mt-0.5">
+                {/* Score & Progress */}
+                <div className="space-y-4 pt-4 border-t border-white/[0.06]">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-mono uppercase text-zinc-500">Reliability Score</span>
+                      <div className="flex items-baseline gap-1.5">
                         <span
                           className={clsx(
-                            "text-lg font-bold font-mono",
-                            score >= 80 ? "text-emerald-400" : score >= 50 ? "text-amber-400" : "text-rose-400"
+                            "text-2xl font-bold font-mono",
+                            isHigh && "text-emerald-400",
+                            isMed && "text-amber-400",
+                            !isHigh && !isMed && "text-rose-400"
                           )}
                         >
-                          {score.toFixed(1)}%
+                          {score.toFixed(0)}%
                         </span>
                       </div>
-                    ) : (
-                      <span className="text-xs text-slate-500 font-mono">Not evaluated</span>
-                    )}
-                  </div>
+                    </div>
 
-                  <div className="flex items-center gap-2">
+                    {/* Quick Evaluation CTA Button */}
                     <button
-                      onClick={(e) => handleQuickRun(agent.id, e)}
-                      disabled={isEvaluating}
+                      onClick={(e) => handleQuickRun(e, agent.id)}
+                      disabled={isRunning}
                       className={clsx(
-                        "text-xs px-3 py-1.5 rounded-lg border font-medium flex items-center gap-1.5 transition-all",
-                        isEvaluating
-                          ? "bg-amber-950/60 border-amber-800 text-amber-300"
-                          : "bg-slate-800 hover:bg-cyan-500/20 border-slate-700 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300"
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold font-mono flex items-center gap-1.5 transition-all border",
+                        isRunning
+                          ? "bg-amber-950/80 text-amber-300 border-amber-800"
+                          : "bg-zinc-900 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/[0.08] hover:border-cyan-500/30"
                       )}
                     >
-                      {isEvaluating ? (
+                      {isRunning ? (
                         <>
-                          <RefreshCw className="w-3 h-3 animate-spin text-amber-400" />
-                          <span>Evaluating...</span>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                          <span>Running ({evalProgress}%)...</span>
                         </>
                       ) : (
                         <>
@@ -274,6 +304,23 @@ export default function AgentsPage() {
                       )}
                     </button>
                   </div>
+
+                  {/* Micro Progress Bar */}
+                  <div className="w-full bg-zinc-950 rounded-full h-1 overflow-hidden">
+                    <div
+                      className={clsx(
+                        "h-full transition-all duration-300",
+                        isRunning
+                          ? "bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+                          : isHigh
+                          ? "bg-emerald-400"
+                          : isMed
+                          ? "bg-amber-400"
+                          : "bg-rose-400"
+                      )}
+                      style={{ width: isRunning ? `${evalProgress || 15}%` : `${score}%` }}
+                    />
+                  </div>
                 </div>
               </Link>
             );
@@ -281,11 +328,14 @@ export default function AgentsPage() {
         </div>
       )}
 
-      {/* New Agent Modal */}
+      {/* Modal */}
       <CreateAgentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onCreated={() => fetchAgents()}
+        onSuccess={(id) => {
+          fetchAgents();
+          window.location.href = `/agents/${id}`;
+        }}
       />
     </div>
   );

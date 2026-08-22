@@ -25,8 +25,9 @@ import {
   RefreshCw,
   AlertTriangle,
   Compass,
-  Layers,
   Award,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import clsx from "clsx";
 import type { ScorecardMetrics } from "@sentinel/shared";
@@ -40,22 +41,22 @@ export function ScorecardView({ scorecard }: ScorecardViewProps) {
     {
       name: "Tool Loop",
       count: scorecard.failureDistribution["tool_loop"] || 0,
-      color: "#f59e0b", // Amber
+      color: "#f59e0b",
     },
     {
       name: "Hallucination",
       count: scorecard.failureDistribution["hallucinated_confidence"] || 0,
-      color: "#fb923c", // Orange
+      color: "#fb923c",
     },
     {
       name: "Destructive Action",
       count: scorecard.failureDistribution["unsafe_destructive_action"] || 0,
-      color: "#f43f5e", // Rose
+      color: "#f43f5e",
     },
     {
       name: "Goal Drift",
       count: scorecard.failureDistribution["goal_drift"] || 0,
-      color: "#6366f1", // Indigo
+      color: "#6366f1",
     },
   ];
 
@@ -72,42 +73,48 @@ export function ScorecardView({ scorecard }: ScorecardViewProps) {
   return (
     <div className="space-y-8">
       {/* Top Header Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded">
-              Active Suite: v{scorecard.version}
+            <span className="text-[11px] font-mono text-cyan-400 bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded">
+              Active Snapshot: v{scorecard.version}
             </span>
-            <span className="text-xs text-slate-500 font-mono">•</span>
-            <span className="text-xs text-slate-400 font-mono">Agent ID: {scorecard.agentId}</span>
+            <span className="text-zinc-600 font-mono">•</span>
+            <span className="text-[11px] text-zinc-400 font-mono">Agent ID: {scorecard.agentId.slice(-8)}</span>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-            <Award className="w-6 h-6 text-cyan-400" /> Reliability Scorecard & Audit
+          <h2 className="text-2xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2.5">
+            <Award className="w-6 h-6 text-cyan-400" />
+            <span>Reliability Scorecard & Continuous Audit</span>
           </h2>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href={`/agents/${scorecard.agentId}/compare?v1=1&v2=${scorecard.version}`}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-2 border border-slate-700 transition-all shadow-sm"
+            className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-semibold flex items-center gap-2 border border-white/10 transition-all shadow-sm active:scale-95"
           >
-            <GitCompare className="w-4 h-4 text-indigo-400" /> Compare Versions
+            <GitCompare className="w-4 h-4 text-indigo-400" />
+            <span>Compare Versions</span>
           </Link>
 
           <button
             onClick={() => downloadReport(scorecard.agentId, scorecard.agentName)}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 text-xs font-semibold flex items-center gap-2 transition-all shadow-lg shadow-cyan-500/20"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-zinc-950 text-xs font-semibold flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95"
           >
-            <Download className="w-4 h-4" /> Export Markdown Audit
+            <Download className="w-4 h-4" />
+            <span>Export Markdown Audit</span>
           </button>
         </div>
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Main Reliability Score Gauge */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between space-y-3">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Reliability Score</span>
+        <div className="p-5 rounded-2xl glass-card border border-white/[0.08] flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Reliability Score</span>
+            <ShieldCheck className={clsx("w-4 h-4", isHighReliability ? "text-emerald-400" : isMedReliability ? "text-amber-400" : "text-rose-400")} />
+          </div>
           <div className="flex items-baseline gap-2">
             <span
               className={clsx(
@@ -120,13 +127,13 @@ export function ScorecardView({ scorecard }: ScorecardViewProps) {
               {scorecard.reliabilityScore.toFixed(1)}%
             </span>
           </div>
-          <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-zinc-950 rounded-full h-1.5 overflow-hidden border border-white/[0.04]">
             <div
               className={clsx(
                 "h-full transition-all duration-500",
-                isHighReliability && "bg-emerald-400",
-                isMedReliability && "bg-amber-400",
-                !isHighReliability && !isMedReliability && "bg-rose-400"
+                isHighReliability && "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]",
+                isMedReliability && "bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.5)]",
+                !isHighReliability && !isMedReliability && "bg-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
               )}
               style={{ width: `${scorecard.reliabilityScore}%` }}
             />
@@ -134,54 +141,61 @@ export function ScorecardView({ scorecard }: ScorecardViewProps) {
         </div>
 
         {/* Total Scenarios Evaluated */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Evaluations Run</span>
+        <div className="p-5 rounded-2xl glass-card border border-white/[0.08] space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Evaluations Run</span>
+            <Zap className="w-4 h-4 text-cyan-400" />
+          </div>
           <div className="text-3xl font-bold font-mono text-white">{scorecard.totalRuns}</div>
-          <span className="text-xs text-slate-500 font-mono block">Automated test scenarios</span>
+          <span className="text-[11px] text-zinc-500 font-mono block">Automated test scenarios</span>
         </div>
 
         {/* Passed Scenarios */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-          <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Passed Scenarios
-          </span>
+        <div className="p-5 rounded-2xl glass-card border border-white/[0.08] space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400">Passed Scenarios</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          </div>
           <div className="text-3xl font-bold font-mono text-emerald-400">{scorecard.passedRuns}</div>
-          <span className="text-xs text-slate-500 font-mono block">Satisfied expected behavior</span>
+          <span className="text-[11px] text-zinc-500 font-mono block">Satisfied expected behavior</span>
         </div>
 
         {/* Failed Scenarios */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
-          <span className="text-xs font-mono uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-            <XCircle className="w-3.5 h-3.5" /> Failures Detected
-          </span>
+        <div className="p-5 rounded-2xl glass-card border border-white/[0.08] space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-rose-400">Failures Detected</span>
+            <XCircle className="w-4 h-4 text-rose-400" />
+          </div>
           <div className="text-3xl font-bold font-mono text-rose-400">{scorecard.failedRuns}</div>
-          <span className="text-xs text-slate-500 font-mono block">Flagged by LLM judge rubric</span>
+          <span className="text-[11px] text-zinc-500 font-mono block">Flagged by LLM judge rubric</span>
         </div>
       </div>
 
       {/* Visualizations Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Failure Taxonomy Breakdown */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-2xl glass-card border border-white/[0.08] space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-sm text-white">Failure Mode Taxonomy Breakdown</h3>
-              <p className="text-xs text-slate-400">Distribution across the 4 core AI failure categories</p>
+              <h3 className="font-bold text-sm text-white">Failure Mode Taxonomy Breakdown</h3>
+              <p className="text-xs text-zinc-400">Distribution across the 4 core AI failure categories</p>
             </div>
           </div>
 
           <div className="h-64 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={failureData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
-                <XAxis type="number" stroke="#64748b" fontSize={11} />
-                <YAxis dataKey="name" type="category" stroke="#cbd5e1" fontSize={11} width={120} />
+              <BarChart data={failureData} layout="vertical" margin={{ top: 5, right: 30, left: 30, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
+                <XAxis type="number" stroke="#71717a" fontSize={11} />
+                <YAxis dataKey="name" type="category" stroke="#e4e4e7" fontSize={11} width={120} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#020617",
-                    borderColor: "#334155",
+                    backgroundColor: "#09090b",
+                    borderColor: "#3f3f46",
                     borderRadius: "0.75rem",
                     fontSize: "12px",
+                    color: "#f4f4f5",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
                   }}
                 />
                 <Bar dataKey="count" radius={[0, 6, 6, 0]}>
@@ -195,13 +209,13 @@ export function ScorecardView({ scorecard }: ScorecardViewProps) {
         </div>
 
         {/* Version Trajectory Trend */}
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <div className="p-6 rounded-2xl glass-card border border-white/[0.08] space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-sm text-white">Historical Reliability Trajectory</h3>
-              <p className="text-xs text-slate-400">Regression tracking across agent iterations</p>
+              <h3 className="font-bold text-sm text-white">Historical Reliability Trajectory</h3>
+              <p className="text-xs text-zinc-400">Regression tracking across agent iterations</p>
             </div>
-            <span className="text-xs font-mono text-cyan-400 flex items-center gap-1">
+            <span className="text-xs font-mono text-cyan-400 flex items-center gap-1 bg-cyan-950/50 px-2 py-0.5 rounded border border-cyan-500/20">
               <TrendingUp className="w-3.5 h-3.5" /> {trajectoryData.length} Snapshots
             </span>
           </div>
@@ -215,15 +229,17 @@ export function ScorecardView({ scorecard }: ScorecardViewProps) {
                     <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="version" stroke="#64748b" fontSize={11} />
-                <YAxis domain={[0, 100]} stroke="#64748b" fontSize={11} unit="%" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis dataKey="version" stroke="#71717a" fontSize={11} />
+                <YAxis domain={[0, 100]} stroke="#71717a" fontSize={11} unit="%" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#020617",
-                    borderColor: "#334155",
+                    backgroundColor: "#09090b",
+                    borderColor: "#3f3f46",
                     borderRadius: "0.75rem",
                     fontSize: "12px",
+                    color: "#f4f4f5",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
                   }}
                 />
                 <Area

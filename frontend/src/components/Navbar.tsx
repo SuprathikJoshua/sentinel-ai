@@ -3,111 +3,118 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck, PlusCircle, LayoutDashboard, Terminal, Activity } from "lucide-react";
+import {
+  ShieldAlert,
+  Bot,
+  Activity,
+  Plus,
+  GitBranch,
+  Terminal,
+  Layers,
+  Sparkles,
+} from "lucide-react";
 import clsx from "clsx";
 
 export function Navbar() {
   const pathname = usePathname();
-  const [dbStatus, setDbStatus] = useState<"connected" | "checking" | "disconnected">("checking");
+  const [health, setHealth] = useState<{ status: string; db: string } | null>(null);
 
   useEffect(() => {
     async function checkHealth() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/health`);
-        const data = await res.json();
-        if (data.status === "healthy" && data.db === "connected") {
-          setDbStatus("connected");
+        const res = await fetch("http://localhost:4000/health", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          setHealth({ status: data.status, db: data.db });
         } else {
-          setDbStatus("disconnected");
+          setHealth({ status: "degraded", db: "disconnected" });
         }
       } catch {
-        setDbStatus("disconnected");
+        setHealth({ status: "offline", db: "offline" });
       }
     }
-
     checkHealth();
-    const interval = setInterval(checkHealth, 15000);
+    const interval = setInterval(checkHealth, 8000);
     return () => clearInterval(interval);
   }, []);
 
-  const navItems = [
-    { href: "/agents", label: "Agents Studio", icon: LayoutDashboard },
-    { href: "/agents/new", label: "New Agent", icon: PlusCircle },
+  const navLinks = [
+    { href: "/agents", label: "Agent Studio", icon: Bot },
+    { href: "/agents/new", label: "New Agent", icon: Plus },
   ];
 
+  const isHealthy = health?.status === "healthy" && health?.db === "connected";
+
   return (
-    <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-5 h-5" />
+    <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-black/60 backdrop-blur-xl transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        {/* Left: Brand Identity */}
+        <div className="flex items-center gap-6">
+          <Link href="/agents" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center text-cyan-400 group-hover:border-cyan-500/50 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all">
+              <ShieldAlert className="w-4 h-4 text-cyan-400 group-hover:scale-105 transition-transform" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-base tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
-                Sentinel AI
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-bold text-sm tracking-tight text-white font-sans">
+                Sentinel<span className="text-cyan-400 font-extrabold">.ai</span>
               </span>
-              <span className="text-[10px] uppercase font-mono tracking-wider text-cyan-400 -mt-1">
-                Reliability Engine
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-zinc-400 border border-white/[0.08]">
+                v1.0
               </span>
             </div>
           </Link>
 
-          <span className="hidden sm:inline-flex text-xs uppercase px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-mono ml-2">
-            CI/CD Harness
-          </span>
+          {/* Nav links */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname === link.href || (link.href !== "/agents/new" && pathname.startsWith(link.href) && !pathname.endsWith("/new"));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={clsx(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+                    isActive
+                      ? "text-white bg-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                  )}
+                >
+                  <Icon className={clsx("w-3.5 h-3.5", isActive ? "text-cyan-400" : "text-zinc-400")} />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex items-center gap-2 sm:gap-4">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href) && item.href !== "/agents/new");
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={clsx(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-                  isActive
-                    ? "bg-slate-800 text-cyan-400 border border-slate-700 shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-
-          <div className="h-4 w-px bg-slate-800 mx-1 hidden sm:block" />
-
-          {/* Live DB Indicator */}
-          <div className="flex items-center gap-2 text-xs font-mono px-3 py-1 rounded-full bg-slate-900 border border-slate-800">
-            <Activity className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-400 hidden md:inline">API:</span>
+        {/* Right: Health Telemetry & Action CTA */}
+        <div className="flex items-center gap-3">
+          {/* Live Engine Status Pill */}
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-900/90 border border-white/[0.08] text-[11px] font-mono">
             <span
               className={clsx(
-                "inline-flex items-center gap-1.5 font-medium",
-                dbStatus === "connected" && "text-emerald-400",
-                dbStatus === "checking" && "text-amber-400",
-                dbStatus === "disconnected" && "text-rose-400"
+                "w-2 h-2 rounded-full",
+                isHealthy
+                  ? "bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"
+                  : health?.status === "degraded"
+                  ? "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.7)]"
+                  : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.7)]"
               )}
-            >
-              <span
-                className={clsx(
-                  "w-2 h-2 rounded-full",
-                  dbStatus === "connected" && "bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse",
-                  dbStatus === "checking" && "bg-amber-400 animate-ping",
-                  dbStatus === "disconnected" && "bg-rose-400"
-                )}
-              />
-              {dbStatus === "connected" ? "Live" : dbStatus === "checking" ? "Checking" : "Offline"}
+            />
+            <span className="text-zinc-300">
+              {isHealthy ? "Harness Online" : health?.status ? health.status.toUpperCase() : "Connecting..."}
             </span>
           </div>
-        </nav>
+
+          <Link
+            href="/agents/new"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-zinc-950 font-semibold text-xs transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="hidden sm:inline">New Agent</span>
+          </Link>
+        </div>
       </div>
     </header>
   );

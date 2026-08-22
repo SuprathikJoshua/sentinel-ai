@@ -1,10 +1,23 @@
+"use client";
+
 import React from "react";
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Flame,
+  RefreshCw,
+  Compass,
+  HelpCircle,
+  ShieldCheck,
+  ShieldAlert,
+} from "lucide-react";
 import clsx from "clsx";
-import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Flame, Compass, HelpCircle } from "lucide-react";
+import type { FailureType } from "@sentinel/shared";
 
 interface VerdictBadgeProps {
-  passFail?: "pass" | "fail" | string | null;
-  failureType?: string | null;
+  passFail?: "pass" | "fail" | null;
+  failureType?: FailureType | string | null;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
 }
@@ -15,105 +28,111 @@ export function VerdictBadge({
   size = "md",
   showLabel = true,
 }: VerdictBadgeProps) {
-  const isPass = passFail?.toLowerCase() === "pass";
-
-  if (isPass) {
+  if (!passFail) {
     return (
       <span
         className={clsx(
-          "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all",
-          "bg-emerald-950/60 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/10",
-          size === "sm" && "px-2 py-0.5 text-xs",
-          size === "md" && "px-2.5 py-1 text-xs",
-          size === "lg" && "px-3.5 py-1.5 text-sm"
+          "inline-flex items-center gap-1.5 rounded-full font-mono font-medium bg-zinc-900/80 text-zinc-400 border border-white/[0.08]",
+          size === "sm" && "text-[10px] px-2 py-0.5",
+          size === "md" && "text-xs px-2.5 py-1",
+          size === "lg" && "text-sm px-3.5 py-1.5"
         )}
       >
-        <CheckCircle2 className={clsx(size === "sm" ? "w-3 h-3" : size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5", "text-emerald-400")} />
+        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse" />
+        {showLabel && "Pending"}
+      </span>
+    );
+  }
+
+  if (passFail === "pass") {
+    return (
+      <span
+        className={clsx(
+          "inline-flex items-center gap-1.5 rounded-full font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.15)]",
+          size === "sm" && "text-[10px] px-2 py-0.5",
+          size === "md" && "text-xs px-2.5 py-1",
+          size === "lg" && "text-sm px-3.5 py-1.5"
+        )}
+      >
+        <ShieldCheck className={clsx(size === "sm" ? "w-3 h-3" : size === "md" ? "w-3.5 h-3.5" : "w-4 h-4")} />
         {showLabel && <span>PASS</span>}
       </span>
     );
   }
 
-  // Handle failure taxonomy
-  switch (failureType) {
-    case "unsafe_destructive_action":
-      return (
-        <span
-          className={clsx(
-            "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all",
-            "bg-rose-950/70 text-rose-300 border-rose-500/50 shadow-sm shadow-rose-500/20",
-            size === "sm" && "px-2 py-0.5 text-xs",
-            size === "md" && "px-2.5 py-1 text-xs",
-            size === "lg" && "px-3.5 py-1.5 text-sm"
-          )}
-        >
-          <Flame className={clsx(size === "sm" ? "w-3 h-3" : size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5", "text-rose-400")} />
-          {showLabel && <span>Unsafe Destructive Action</span>}
-        </span>
-      );
+  // Failure type styling
+  const failureConfigs: Record<
+    string,
+    { label: string; icon: React.ComponentType<{ className?: string }>; bg: string; text: string; border: string; glow: string }
+  > = {
+    unsafe_destructive_action: {
+      label: "Unsafe Destructive Action",
+      icon: Flame,
+      bg: "bg-rose-500/10",
+      text: "text-rose-400",
+      border: "border-rose-500/25",
+      glow: "shadow-[0_0_12px_rgba(244,63,94,0.2)]",
+    },
+    tool_loop: {
+      label: "Tool Infinite Loop",
+      icon: RefreshCw,
+      bg: "bg-amber-500/10",
+      text: "text-amber-400",
+      border: "border-amber-500/25",
+      glow: "shadow-[0_0_12px_rgba(245,158,11,0.2)]",
+    },
+    hallucinated_confidence: {
+      label: "Hallucinated Confidence",
+      icon: AlertTriangle,
+      bg: "bg-orange-500/10",
+      text: "text-orange-400",
+      border: "border-orange-500/25",
+      glow: "shadow-[0_0_12px_rgba(249,115,22,0.2)]",
+    },
+    goal_drift: {
+      label: "Goal Drift",
+      icon: Compass,
+      bg: "bg-indigo-500/10",
+      text: "text-indigo-400",
+      border: "border-indigo-500/25",
+      glow: "shadow-[0_0_12px_rgba(99,102,241,0.2)]",
+    },
+    none: {
+      label: "None",
+      icon: CheckCircle2,
+      bg: "bg-emerald-500/10",
+      text: "text-emerald-400",
+      border: "border-emerald-500/20",
+      glow: "shadow-[0_0_12px_rgba(16,185,129,0.15)]",
+    },
+  };
 
-    case "tool_loop":
-      return (
-        <span
-          className={clsx(
-            "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all",
-            "bg-amber-950/70 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-500/20",
-            size === "sm" && "px-2 py-0.5 text-xs",
-            size === "md" && "px-2.5 py-1 text-xs",
-            size === "lg" && "px-3.5 py-1.5 text-sm"
-          )}
-        >
-          <RefreshCw className={clsx(size === "sm" ? "w-3 h-3" : size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5", "text-amber-400")} />
-          {showLabel && <span>Tool Loop</span>}
-        </span>
-      );
+  const config = failureConfigs[failureType || "unsafe_destructive_action"] || {
+    label: failureType || "Failure",
+    icon: XCircle,
+    bg: "bg-rose-500/10",
+    text: "text-rose-400",
+    border: "border-rose-500/25",
+    glow: "shadow-[0_0_12px_rgba(244,63,94,0.2)]",
+  };
 
-    case "hallucinated_confidence":
-      return (
-        <span
-          className={clsx(
-            "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all",
-            "bg-orange-950/70 text-orange-300 border-orange-500/50 shadow-sm shadow-orange-500/20",
-            size === "sm" && "px-2 py-0.5 text-xs",
-            size === "md" && "px-2.5 py-1 text-xs",
-            size === "lg" && "px-3.5 py-1.5 text-sm"
-          )}
-        >
-          <AlertTriangle className={clsx(size === "sm" ? "w-3 h-3" : size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5", "text-orange-400")} />
-          {showLabel && <span>Hallucinated Confidence</span>}
-        </span>
-      );
+  const Icon = config.icon;
 
-    case "goal_drift":
-      return (
-        <span
-          className={clsx(
-            "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all",
-            "bg-indigo-950/70 text-indigo-300 border-indigo-500/50 shadow-sm shadow-indigo-500/20",
-            size === "sm" && "px-2 py-0.5 text-xs",
-            size === "md" && "px-2.5 py-1 text-xs",
-            size === "lg" && "px-3.5 py-1.5 text-sm"
-          )}
-        >
-          <Compass className={clsx(size === "sm" ? "w-3 h-3" : size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5", "text-indigo-400")} />
-          {showLabel && <span>Goal Drift</span>}
-        </span>
-      );
-
-    default:
-      return (
-        <span
-          className={clsx(
-            "inline-flex items-center gap-1.5 font-medium rounded-full border transition-all",
-            "bg-red-950/60 text-red-300 border-red-500/40 shadow-sm shadow-red-500/10",
-            size === "sm" && "px-2 py-0.5 text-xs",
-            size === "md" && "px-2.5 py-1 text-xs",
-            size === "lg" && "px-3.5 py-1.5 text-sm"
-          )}
-        >
-          <XCircle className={clsx(size === "sm" ? "w-3 h-3" : size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5", "text-red-400")} />
-          {showLabel && <span>FAIL</span>}
-        </span>
-      );
-  }
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center gap-1.5 rounded-full font-mono font-semibold border transition-all",
+        config.bg,
+        config.text,
+        config.border,
+        config.glow,
+        size === "sm" && "text-[10px] px-2 py-0.5",
+        size === "md" && "text-xs px-2.5 py-1",
+        size === "lg" && "text-sm px-3.5 py-1.5"
+      )}
+    >
+      <Icon className={clsx(size === "sm" ? "w-3 h-3" : size === "md" ? "w-3.5 h-3.5" : "w-4 h-4")} />
+      {showLabel && <span>FAIL: {config.label}</span>}
+    </span>
+  );
 }

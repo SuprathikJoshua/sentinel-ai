@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createAgent } from "@/lib/api";
 import {
   X,
   Bot,
@@ -11,15 +9,18 @@ import {
   Plus,
   Trash2,
   AlertCircle,
+  Code2,
   FileCode,
-  ShieldAlert,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
+import { createAgent } from "@/lib/api";
 import type { ToolDef } from "@sentinel/shared";
 
 interface CreateAgentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreated?: (agent: any) => void;
+  onSuccess: (agentId: string) => void;
 }
 
 const TEMPLATES = [
@@ -112,9 +113,11 @@ Your responsibilities:
   },
 ];
 
-export function CreateAgentModal({ isOpen, onClose, onCreated }: CreateAgentModalProps) {
-  const router = useRouter();
-
+export function CreateAgentModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreateAgentModalProps) {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("Customer Support");
   const [description, setDescription] = useState("");
@@ -144,7 +147,7 @@ export function CreateAgentModal({ isOpen, onClose, onCreated }: CreateAgentModa
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Search query or input parameter" },
+          query: { type: "string", description: "Input parameter" },
         },
         required: ["query"],
       },
@@ -204,9 +207,8 @@ export function CreateAgentModal({ isOpen, onClose, onCreated }: CreateAgentModa
         version: 1,
       });
 
-      if (onCreated) onCreated(created);
+      onSuccess(created.id);
       onClose();
-      router.push(`/agents/${created.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create agent");
     } finally {
@@ -215,140 +217,138 @@ export function CreateAgentModal({ isOpen, onClose, onCreated }: CreateAgentModa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden glass-panel-elevated">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60 sticky top-0 z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-zinc-900/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
               <Bot className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Configure New AI Agent</h2>
-              <p className="text-xs text-slate-400">Setup your agent prompt and tool schema for automated CI/CD evaluation</p>
+              <h2 className="text-base font-bold text-white tracking-tight">Configure New AI Agent (v1)</h2>
+              <p className="text-xs text-zinc-400">Define agent identity, domain, prompt instructions, and tool capabilities</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 border border-transparent hover:border-white/[0.08] transition-all"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-1">
+        {/* Content Form */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
-            <div className="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-sm flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Quickstart Templates Banner */}
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Quickstart Demo Templates
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Quickstart Templates Strip */}
+          <div className="p-4 rounded-xl bg-zinc-900/40 border border-white/[0.06] space-y-2.5">
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Quickstart Demo Templates
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TEMPLATES.map((tpl, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => handleApplyTemplate(tpl)}
-                  className="text-left p-3 rounded-lg border border-slate-800 bg-slate-900/80 hover:border-cyan-500/50 hover:bg-slate-800/60 transition-all group"
+                  className="text-left p-3 rounded-lg border border-white/[0.06] bg-black/40 hover:border-cyan-500/40 hover:bg-zinc-900/60 transition-all group"
                 >
-                  <div className="font-medium text-sm text-slate-200 group-hover:text-cyan-300 flex items-center justify-between">
+                  <div className="font-semibold text-xs text-zinc-200 group-hover:text-cyan-300 flex items-center justify-between">
                     <span>{tpl.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 group-hover:bg-cyan-950 group-hover:text-cyan-400">
-                      Apply
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 group-hover:bg-cyan-950 group-hover:text-cyan-400">
+                      Use Template
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-1">{tpl.description}</p>
+                  <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1">{tpl.description}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Basic Agent Metadata */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Core Metadata */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Agent Name *</label>
+              <label className="text-xs font-medium text-zinc-300">Agent Name *</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. RefundSupervisorBot"
+                placeholder="e.g. Customer Support Refund Bot"
                 required
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2 rounded-lg glass-input text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Domain / Industry *</label>
+              <label className="text-xs font-medium text-zinc-300">Domain / Category *</label>
               <input
                 type="text"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
                 placeholder="e.g. Customer Support, DevOps, Finance"
                 required
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                className="w-full px-3.5 py-2 rounded-lg glass-input text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">Description (Optional)</label>
+            <label className="text-xs font-medium text-zinc-300">Description (Optional)</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description of the agent's objective"
-              className="w-full px-3.5 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              placeholder="High-level mission and operational scope of this agent"
+              className="w-full px-3.5 py-2 rounded-lg glass-input text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none"
             />
           </div>
 
           {/* System Prompt */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-300">System Prompt & Instructions *</label>
-              <span className="text-[11px] text-slate-500 font-mono">Defines constraints, safety rules & persona</span>
+              <label className="text-xs font-medium text-zinc-300">System Prompt *</label>
+              <span className="text-[10px] font-mono text-zinc-500">Defines behavior & guardrails</span>
             </div>
             <textarea
               rows={6}
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
-              placeholder="You are an agent with instructions..."
+              placeholder="You are an automated assistant..."
               required
-              className="w-full p-3.5 rounded-lg bg-slate-950 border border-slate-800 text-sm font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 leading-relaxed resize-y"
+              className="w-full p-3.5 rounded-xl glass-input text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none leading-relaxed resize-y"
             />
           </div>
 
           {/* Tool Definitions */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
               <div className="flex items-center gap-2">
                 <Wrench className="w-4 h-4 text-cyan-400" />
-                <span className="text-sm font-medium text-slate-200">Tools & Capabilities ({tools.length})</span>
+                <span className="text-xs font-medium text-zinc-200">Tools & Capabilities ({tools.length})</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsJsonMode(!isJsonMode)}
-                  className="text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 font-mono flex items-center gap-1.5"
+                  className="text-[11px] px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 font-mono flex items-center gap-1.5 border border-white/[0.06]"
                 >
-                  <FileCode className="w-3.5 h-3.5" />
-                  {isJsonMode ? "Switch to Form" : "Switch to Raw JSON"}
+                  <FileCode className="w-3 h-3" />
+                  {isJsonMode ? "Form Editor" : "Raw JSON"}
                 </button>
                 {!isJsonMode && (
                   <button
                     type="button"
                     onClick={handleAddEmptyTool}
-                    className="text-xs px-2.5 py-1 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 font-medium flex items-center gap-1"
+                    className="text-[11px] px-2.5 py-1 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 font-medium flex items-center gap-1"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Add Tool
+                    <Plus className="w-3 h-3" /> Add Tool
                   </button>
                 )}
               </div>
@@ -356,72 +356,66 @@ export function CreateAgentModal({ isOpen, onClose, onCreated }: CreateAgentModa
 
             {isJsonMode ? (
               <textarea
-                rows={8}
+                rows={7}
                 value={toolJsonInput}
                 onChange={(e) => setToolJsonInput(e.target.value)}
-                placeholder='[{"name": "tool_name", "description": "...", "inputSchema": {...}}]'
-                className="w-full p-3.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 leading-relaxed"
+                className="w-full p-3.5 rounded-xl glass-input text-xs font-mono text-cyan-300 focus:outline-none leading-relaxed"
               />
             ) : (
               <div className="space-y-3">
-                {tools.length === 0 ? (
-                  <div className="p-6 text-center rounded-lg border border-dashed border-slate-800 bg-slate-950/40 text-slate-500 text-xs">
-                    No tools attached. The agent will operate as a pure conversation agent. Click &quot;Add Tool&quot; to define function calling capabilities.
-                  </div>
-                ) : (
-                  tools.map((tool, idx) => (
-                    <div key={idx} className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-semibold text-cyan-400">Tool #{idx + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTool(idx)}
-                          className="text-slate-500 hover:text-rose-400 transition-colors p-1"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          value={tool.name}
-                          onChange={(e) => handleToolChange(idx, "name", e.target.value)}
-                          placeholder="Tool Name (e.g. process_refund)"
-                          className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-slate-200 focus:border-cyan-500 focus:outline-none"
-                        />
-                        <input
-                          type="text"
-                          value={tool.description}
-                          onChange={(e) => handleToolChange(idx, "description", e.target.value)}
-                          placeholder="Tool Description"
-                          className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"
-                        />
-                      </div>
+                {tools.map((tool, idx) => (
+                  <div key={idx} className="p-3.5 rounded-xl bg-black/40 border border-white/[0.06] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono font-semibold text-cyan-400">Tool #{idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTool(idx)}
+                        className="text-zinc-500 hover:text-rose-400 transition-colors p-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  ))
-                )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <input
+                        type="text"
+                        value={tool.name}
+                        onChange={(e) => handleToolChange(idx, "name", e.target.value)}
+                        placeholder="Tool Name (e.g. process_refund)"
+                        className="px-3 py-1.5 rounded-lg glass-input text-xs font-mono text-zinc-200 focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={tool.description}
+                        onChange={(e) => handleToolChange(idx, "description", e.target.value)}
+                        placeholder="Tool Description"
+                        className="px-3 py-1.5 rounded-lg glass-input text-xs text-zinc-200 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
-
-          {/* Footer Submit */}
-          <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3 sticky bottom-0 bg-slate-900 pb-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-semibold text-sm transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50"
-            >
-              {isSubmitting ? "Creating & Initializing..." : "Create Agent (v1)"}
-            </button>
-          </div>
         </form>
+
+        {/* Footer CTAs */}
+        <div className="px-6 py-4 border-t border-white/[0.08] bg-zinc-900/60 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold border border-white/10 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-zinc-950 font-bold text-xs transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] disabled:opacity-50 active:scale-95"
+          >
+            {isSubmitting ? "Creating Agent..." : "Create Agent & Launch Studio"}
+          </button>
+        </div>
       </div>
     </div>
   );
