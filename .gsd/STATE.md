@@ -1,5 +1,5 @@
 ---
-updated: 2026-08-22T20:00:00Z
+updated: 2026-08-22T20:20:00Z
 ---
 
 # Project State — Sentinel AI
@@ -7,23 +7,24 @@ updated: 2026-08-22T20:00:00Z
 ## Current Position
 
 **Milestone:** v1.0 — Sentinel AI Engine  
-**Phase:** Phase 4 Complete (Backend REST API & Evaluation Pipeline) → Ready for Phase 5 (Frontend Dashboard & Agent Setup Flow)  
+**Phase:** Phase 5 Complete (Frontend UI) → Ready for Phase 6 (End-to-End Integration, Demo Scenarios & Verification)  
 **Status:** Verified  
-**Plan:** Ready for `/plan 5` or `/execute 5`
+**Plan:** Ready for `/plan 6` or `/execute 6`
 
 ## Last Action
 
-Completed Phase 4 execution:
-- Implemented Agent CRUD and versioning routes (`GET /api/agents`, `POST /api/agents`, `GET /api/agents/:id`, `POST /api/agents/:id/versions`, `DELETE /api/agents/:id`) using Prisma 7 with atomic transactions and Zod schema validations.
-- Implemented Scenario management and AI generation routes (`GET /api/agents/:id/scenarios`, `POST /api/agents/:id/scenarios`, `POST /api/agents/:id/scenarios/generate`, `DELETE /api/scenarios/:id`).
-- Implemented asynchronous non-blocking evaluation pipeline (`POST /api/agents/:id/run` returning 202 Accepted with background worker executing sandbox harness -> LLM judge classification -> Prisma persistence).
-- Implemented job status polling (`GET /api/jobs/:id`) and run telemetry inspection (`GET /api/runs/:id`, `GET /api/agents/:id/runs`).
-- Implemented Scorecard analytics (`GET /api/agents/:id/scorecard`), Version Comparison diffs (`GET /api/agents/:id/compare`), and Markdown Report generator (`GET /api/agents/:id/report`).
-- Modularized Express app into `app.ts` and `index.ts` and verified all endpoints against live Supabase PostgreSQL in `scripts/test-api-routes.ts` with 0 TypeScript compilation errors.
+Completed Phase 5 execution:
+- Built full-featured Next.js 15 App Router frontend (`/agents`, `/agents/new`, `/agents/[id]`, `/agents/[id]/scorecard`, `/agents/[id]/compare`, `/agents/[id]/runs/[runId]`).
+- Implemented `VerdictBadge.tsx` with color-coded failure taxonomy pills (`tool_loop`, `hallucinated_confidence`, `unsafe_destructive_action`, `goal_drift`, `none`).
+- Implemented `TraceViewer.tsx` with chronological multi-turn stream, collapsible tool inputs/mock outputs, turn cap telemetry, and LLM-as-a-judge confidence/reasoning verdict banner.
+- Implemented `ScorecardView.tsx` with Recharts horizontal bar failure distribution and area version trajectory charts, plus Markdown report downloader.
+- Implemented `VersionDiffView.tsx` with side-by-side version picker, delta reliability score gauge, and failure taxonomy differential table.
+- Implemented `CreateAgentModal.tsx` and full-page setup wizard with quickstart templates and dynamic tool JSON schema builder.
+- Built production bundle (`bun run --cwd frontend build`) with zero TypeScript errors.
 
 ## Next Steps
 
-1. Execute **Phase 5: Frontend Dashboard & Agent Setup Flow** to build the Next.js 15 App Router interface (Agent management, setup wizard, scenario builder, scorecard metrics visualizer).
+1. Execute **Phase 6: End-to-End Integration, Demo Scenarios & Verification** to seed realistic demo agents (e.g. *Customer Support Refund Bot* v1 failing guardrail vs v2 passing with escalation tool), run end-to-end regression workflows, and finalize all requirements.
 
 ## Active Decisions
 
@@ -32,8 +33,8 @@ Completed Phase 4 execution:
 | Workspace Strategy | Bun Monorepo (`/shared`, `/backend`, `/frontend`) | 2026-08-22 | All Packages |
 | Database & ORM | Supabase PostgreSQL via Prisma 7 with `@prisma/adapter-pg` (`PrismaPg`) | 2026-08-22 | Backend / DB |
 | Auth Architecture | Supabase Auth (`@supabase/ssr` on frontend, JWT verification on Express backend) | 2026-08-22 | Frontend / Backend |
-| AI Evaluation Engine | Vercel AI SDK (`ai`, `@ai-sdk/anthropic`, `zod`) with `generateObject` / `generateText` and shared Zod schemas | 2026-08-22 | AI / Sandbox |
-| Async Evaluation Pattern | Asynchronous queueing (202 Accepted) with background execution updating `EvaluationJob` status | 2026-08-22 | Backend API |
+| UI Component Architecture | Next.js 15 App Router with Tailwind CSS, Lucide icons, and Recharts | 2026-08-22 | Frontend |
+| Asynchronous Execution Pattern | Non-blocking HTTP 202 Accepted with client-side polling poller | 2026-08-22 | Frontend / Backend |
 
 ## Blockers
 
