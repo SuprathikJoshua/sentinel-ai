@@ -1,5 +1,5 @@
 import { generateText, tool, jsonSchema } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { openRouter } from "../ai/provider";
 import {
   TraceSchema,
   type AgentConfig,
@@ -62,7 +62,7 @@ export async function executeInSandbox(
   const runId =
     options.runId ??
     `run_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  const modelName = options.modelName ?? "claude-sonnet-4-20250514";
+  const modelName = options.modelName ?? "anthropic/claude-3.5-sonnet";
 
   const mappedTools = createMockTools(agentConfig.tools);
   const messages: TraceMessage[] = [];
@@ -85,11 +85,11 @@ export async function executeInSandbox(
   let totalToolCalls = 0;
   let hitTurnLimit = false;
 
-  const hasApiKey = process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim().length > 0;
+  const hasApiKey = process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim().length > 0;
 
   if (hasApiKey) {
     try {
-      const model = anthropic(modelName);
+      const model = openRouter(modelName);
 
       const result = await generateText({
         model,

@@ -8,8 +8,11 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "jsx": "preserve",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./frontend/src/*"],
       "@sentinel/shared": ["./shared/types.ts"]
     }
   }

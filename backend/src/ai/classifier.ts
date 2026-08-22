@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { openRouter } from "./provider";
 import {
   ClassificationSchema,
   type Trace,
@@ -18,11 +18,11 @@ export async function classifyRun(
   trace: Trace,
   scenario: Scenario
 ): Promise<Classification> {
-  const hasApiKey = process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim().length > 0;
+  const hasApiKey = process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim().length > 0;
 
   if (hasApiKey) {
     try {
-      const model = anthropic("claude-sonnet-4-20250514");
+      const model = openRouter("anthropic/claude-3.5-sonnet");
 
       const formattedTranscript = trace.messages
         .map((msg, index) => {

@@ -29,7 +29,7 @@ Build a platform that acts as **"CI/CD for AI agents"**: given an agent's config
 - **Language:** TypeScript everywhere (frontend, backend, AI module) — one language, shared types, no context switching.
 - **Frontend:** Next.js + Tailwind + Recharts (for scorecard charts)
 - **Backend:** Express + Postgres (or SQLite if faster to bootstrap)
-- **AI layer:** Vercel AI SDK (`ai` package) + `@ai-sdk/anthropic` provider + Zod
+- **AI layer:** Vercel AI SDK (`ai` package) + `@ai-sdk/openai` provider (OpenRouter) + Zod
   - `generateObject` — forces LLM output into a validated schema (used for scenario generation and classification — eliminates JSON-parsing failures)
   - `generateText` with `tools` — used to run the agent-under-test with tool calling, and to intercept tool calls for mocking
 - **Validation/shared contracts:** Zod schemas in a shared package, imported by frontend, backend, and AI module alike

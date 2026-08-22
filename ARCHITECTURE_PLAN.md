@@ -40,7 +40,7 @@ We use a lightweight, high-performance monorepo powered natively by **Bun Worksp
 │   │   ├── routes/           # REST API endpoints (/agents, /runs, /scorecard, etc.)
 │   │   ├── sandbox/          # Sandbox execution harness & Mock tool executor
 │   │   └── ai/               # AI Eng modules (scenario-gen, guardrails, classifier)
-│   └── .env                  # Backend environment variables (DATABASE_URL, ANTHROPIC_API_KEY)
+│   └── .env                  # Backend environment variables (DATABASE_URL, OPENROUTER_API_KEY)
 │
 ├── /frontend                 # Next.js 15 App Router + Tailwind CSS UI
 │   ├── package.json          # Package name: "@sentinel/frontend"

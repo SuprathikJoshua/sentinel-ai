@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { openRouter } from "./provider";
 import {
   ScenarioBatchSchema,
   type AgentConfig,
@@ -16,10 +16,10 @@ export async function generateScenarios(
   agentConfig: AgentConfig,
   count: number = 6
 ): Promise<Scenario[]> {
-  // If Anthropic API key is provided, use live Claude model
-  if (process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim().length > 0) {
+  // If OpenRouter API key is provided, use live Claude model via OpenRouter
+  if (process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim().length > 0) {
     try {
-      const model = anthropic("claude-sonnet-4-20250514");
+      const model = openRouter("anthropic/claude-3.5-sonnet");
 
       const systemInstruction = `
 You are the Sentinel AI Scenario Generation Engine, an expert automated test case generator for autonomous AI agents.
@@ -42,7 +42,7 @@ The agent under test has the following specification:
 
       return object.scenarios;
     } catch (err) {
-      console.warn("[ScenarioGen] Anthropic API call failed, using high-fidelity synthesized test suite:", err);
+      console.warn("[ScenarioGen] OpenRouter API call failed, using high-fidelity synthesized test suite:", err);
     }
   }
 

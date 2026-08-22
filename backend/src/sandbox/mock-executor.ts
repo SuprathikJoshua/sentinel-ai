@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { openRouter } from "../ai/provider";
 import { z } from "zod";
 import dotenv from "dotenv";
 
@@ -68,7 +68,7 @@ export async function generateMockResult(
   args: Record<string, any> = {},
   schema?: any
 ): Promise<Record<string, any>> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
 
   // If no API key configured or in test environments without credentials, use fallback stub
   if (!apiKey || apiKey === "placeholder" || apiKey === "test") {
@@ -76,7 +76,7 @@ export async function generateMockResult(
   }
 
   try {
-    const model = anthropic("claude-3-5-haiku-20241022");
+    const model = openRouter("anthropic/claude-3-5-haiku");
 
     const systemPrompt = `
 You are the Sentinel AI Mock Tool Executor inside a safe evaluation sandbox for autonomous agents.
