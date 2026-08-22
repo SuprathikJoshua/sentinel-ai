@@ -1,25 +1,26 @@
 {
-  "name": "sentinel-ai",
-  "version": "1.0.0",
-  "private": true,
-  "workspaces": [
-    "shared",
-    "backend",
-    "frontend"
-  ],
-  "scripts": {
-    "dev:backend": "bun --watch run --cwd backend src/index.ts",
-    "dev:frontend": "bun run --cwd frontend dev",
-    "dev": "bun --filter '*' dev",
-    "build": "bun --filter '*' build",
-    "test": "bun test",
-    "db:generate": "bun --cwd backend run prisma generate",
-    "db:push": "bun --cwd backend run prisma db push",
-    "db:migrate": "bun --cwd backend run prisma migrate dev",
-    "db:studio": "bun --cwd backend run prisma studio"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
-  }
+	"name": "sentinel-ai",
+	"version": "1.0.0",
+	"private": true,
+	"workspaces": [
+		"shared",
+		"backend",
+		"frontend"
+	],
+	"packageManager": "bun@1.4.0",
+	"scripts": {
+		"dev:backend": "bun --watch run --cwd backend src/index.ts",
+		"dev:frontend": "bun run --cwd frontend dev",
+		"dev": "bun --filter '*' dev",
+		"build": "bun --filter '*' build",
+		"test": "bun test",
+		"db:generate": "bun --cwd backend run prisma generate",
+		"db:push": "bun --cwd backend run prisma db push",
+		"db:migrate": "bun --cwd backend run prisma migrate dev",
+		"db:studio": "bun --cwd backend run prisma studio"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.2",
+		"typescript": "^5.7.2"
+	}
 }
