@@ -14,18 +14,23 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.1.9",
-    "@prisma/client": "6.4.1",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "@prisma/client-runtime-utils": "7.9.1",
     "@sentinel/shared": "workspace:*",
     "ai": "^4.1.45",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.21.2",
+    "pg": "^8.23.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
-    "prisma": "6.4.1",
+    "@types/pg": "^8.23.1",
+    "prisma": "^7.9.1",
     "typescript": "^5.7.2"
   }
 }
