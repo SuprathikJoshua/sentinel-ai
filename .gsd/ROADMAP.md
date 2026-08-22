@@ -1,13 +1,13 @@
 ---
 milestone: v1.0
 version: 1.0.0
-updated: 2026-08-22T19:30:00Z
+updated: 2026-08-22T19:36:00Z
 ---
 
 # ROADMAP.md — Sentinel AI Roadmap
 
-> **Current Phase:** Phase 3: Sandboxed Execution Harness & Mock Tool Executor
-> **Status:** Phase 2 Complete, Ready for Phase 3
+> **Current Phase:** Phase 4: Backend REST API & Evaluation Pipeline
+> **Status:** Phase 3 Complete, Ready for Phase 4
 
 ---
 
@@ -18,7 +18,7 @@ updated: 2026-08-22T19:30:00Z
 - [x] Supabase Auth SSR on frontend and JWT verification middleware on Express backend
 - [x] AI Scenario Generation Engine producing realistic and adversarial test cases via Vercel AI SDK
 - [x] Destructive Action Guardrail Probe generator testing safety under pressure and prompt injection
-- [ ] Sandboxed Execution Harness with mock tool executor, turn cap loop, and chronological telemetry trace recording
+- [x] Sandboxed Execution Harness with mock tool executor, turn cap loop, and chronological telemetry trace recording
 - [x] LLM-as-a-Judge Failure Classifier evaluating traces into 5 taxonomy categories (`tool_loop`, `hallucinated_confidence`, `unsafe_destructive_action`, `goal_drift`, `none`)
 - [ ] Reliability Scorecard & Version-over-Version Regression Tracker with visual charts
 - [ ] Next.js 15 interactive frontend (Agent editor, Trace timeline viewer, Scorecard dashboard, Report export)
@@ -53,14 +53,14 @@ updated: 2026-08-22T19:30:00Z
 ---
 
 ### Phase 3: Sandboxed Execution Harness & Mock Tool Executor
-**Status:** ⬜ Not Started  
+**Status:** ✅ Complete  
 **Objective:** Build safe execution loop running agents with tool calling against synthetic mock tools, capturing chronological telemetry traces, and enforcing turn caps.  
 **Requirements:** REQ-07, REQ-08  
 **Depends on:** Phase 1, Phase 2  
 
 **Plans:**
-- [ ] Plan 3.1: Build schema-aware Mock Tool Executor generating realistic synthetic JSON responses.
-- [ ] Plan 3.2: Implement Sandboxed Execution Loop using `generateText` with intercepted tool calls, turn limits (max 6 turns), and structured `Trace` capture.
+- [x] Plan 3.1: Build schema-aware Mock Tool Executor generating realistic synthetic JSON responses.
+- [x] Plan 3.2: Implement Sandboxed Execution Loop using `generateText` with intercepted tool calls, turn limits (max 6 turns), and structured `Trace` capture.
 
 ---
 
@@ -108,7 +108,7 @@ updated: 2026-08-22T19:30:00Z
 |---|---|---|---|
 | 1. Foundation & Shared Architecture | ✅ | 3/3 | 100% |
 | 2. AI Engine Core | ✅ | 3/3 | 100% |
-| 3. Sandboxed Execution Harness | ⬜ | 0/2 | — |
+| 3. Sandboxed Execution Harness | ✅ | 2/2 | 100% |
 | 4. Backend REST API & Pipeline | ⬜ | 0/3 | — |
 | 5. Frontend UI | ⬜ | 0/3 | — |
 | 6. E2E Integration & Verification | ⬜ | 0/2 | — |
