@@ -1,21 +1,21 @@
 ---
 milestone: v1.0
 version: 1.0.0
-updated: 2026-08-22T18:47:00Z
+updated: 2026-08-22T19:25:00Z
 ---
 
 # ROADMAP.md — Sentinel AI Roadmap
 
-> **Current Phase:** Not Started
-> **Status:** Planning Ready
+> **Current Phase:** Phase 2: AI Engine Core
+> **Status:** Phase 1 Complete, Ready for Phase 2
 
 ---
 
 ## Must-Haves (from SPEC)
 
-- [ ] Bun monorepo linking `/shared`, `/backend`, and `/frontend` with shared Zod types
-- [ ] Supabase PostgreSQL database persistence via Prisma (`url = env("DATABASE_URL")` and `directUrl = env("DIRECT_URL")`)
-- [ ] Supabase Auth SSR on frontend and JWT verification middleware on Express backend
+- [x] Bun monorepo linking `/shared`, `/backend`, and `/frontend` with shared Zod types
+- [x] Supabase PostgreSQL database persistence via Prisma (`url = env("DATABASE_URL")` and `directUrl = env("DIRECT_URL")`) with Prisma 7 and `@prisma/adapter-pg`
+- [x] Supabase Auth SSR on frontend and JWT verification middleware on Express backend
 - [ ] AI Scenario Generation Engine producing realistic and adversarial test cases via Vercel AI SDK
 - [ ] Destructive Action Guardrail Probe generator testing safety under pressure and prompt injection
 - [ ] Sandboxed Execution Harness with mock tool executor, turn cap loop, and chronological telemetry trace recording
@@ -28,14 +28,14 @@ updated: 2026-08-22T18:47:00Z
 ## Phases
 
 ### Phase 1: Foundation & Shared Architecture
-**Status:** ⬜ Not Started  
+**Status:** ✅ Complete  
 **Objective:** Establish monorepo workspace resolution, shared Zod schemas & types, Supabase PostgreSQL schema with Prisma ORM, and Supabase Auth integration.  
 **Requirements:** REQ-01, REQ-02, REQ-03, REQ-04  
 
 **Plans:**
-- [ ] Plan 1.1: Configure Bun monorepo workspace resolution, `/shared` exports, and verify cross-workspace type imports.
-- [ ] Plan 1.2: Implement Supabase PostgreSQL Prisma schema (`url = env("DATABASE_URL")`, `directUrl = env("DIRECT_URL")`), migrations, and singleton client.
-- [ ] Plan 1.3: Configure Supabase Auth with `@supabase/ssr` on frontend and Express JWT verification middleware on backend.
+- [x] Plan 1.1: Configure Bun monorepo workspace resolution, `/shared` exports, and verify cross-workspace type imports.
+- [x] Plan 1.2: Implement Supabase PostgreSQL Prisma 7 schema (`url = env("DATABASE_URL")`, `directUrl = env("DIRECT_URL")`), migrations, and `@prisma/adapter-pg` singleton client.
+- [x] Plan 1.3: Configure Supabase Auth with `@supabase/ssr` on frontend and Express JWT verification middleware on backend.
 
 ---
 
@@ -106,7 +106,7 @@ updated: 2026-08-22T18:47:00Z
 
 | Phase | Status | Plans | Complete |
 |---|---|---|---|
-| 1. Foundation & Shared Architecture | ⬜ | 0/3 | — |
+| 1. Foundation & Shared Architecture | ✅ | 3/3 | 100% |
 | 2. AI Engine Core | ⬜ | 0/3 | — |
 | 3. Sandboxed Execution Harness | ⬜ | 0/2 | — |
 | 4. Backend REST API & Pipeline | ⬜ | 0/3 | — |
