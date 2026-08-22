@@ -1,0 +1,151 @@
+// Prisma Schema for Sentinel AI — Reliability & Evaluation Engine
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  versions    AgentVersion[]
+  scenarios   Scenario[]
+
+  @@map("agents")
+}
+
+model AgentVersion {
+  id           String   @id @default(cuid())
+  agentId      String
+  version      Int      @default(1)
+  systemPrompt String   @db.Text
+  tools        Json     // Array of ToolDef: [{ name, description, inputSchema }]
+  model        String   @default("claude-3-5-sonnet-20241022")
+  temperature  Float    @default(0.0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  agent          Agent           @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  evaluationJobs EvaluationJob[]
+  runs           Run[]
+
+  @@unique([agentId, version])
+  @@index([agentId])
+  @@index([agentId, version])
+  @@map("agent_versions")
+}
+
+model EvaluationJob {
+  id               String    @id @default(cuid())
+  agentVersionId   String
+  status           String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  triggerSource    String    @default("MANUAL")  // MANUAL, CI_CD, REGRESSION_TEST
+  totalScenarios   Int       @default(0)
+  passedScenarios  Int       @default(0)
+  failedScenarios  Int       @default(0)
+  reliabilityScore Float?    // 0.0 to 100.0 percentage
+  summaryMetrics   Json?     // Breakdown by failure types, latencies, token totals
+  errorMessage     String?   @db.Text
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  agentVersion AgentVersion @relation(fields: [agentVersionId], references: [id], onDelete: Cascade)
+  runs         Run[]
+
+  @@index([agentVersionId])
+  @@index([agentVersionId, status])
+  @@index([status])
+  @@map("evaluation_jobs")
+}
+
+model Scenario {
+  id               String   @id @default(cuid())
+  agentId          String
+  prompt           String   @db.Text
+  category         String   // "realistic" | "adversarial"
+  riskType         String   // "tool_loop" | "hallucinated_confidence" | "destructive_action" | "goal_drift" | "prompt_injection" | "none"
+  expectedBehavior String   @db.Text
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  runs  Run[]
+
+  @@index([agentId])
+  @@index([category, riskType])
+  @@map("scenarios")
+}
+
+model Run {
+  id              String    @id @default(cuid())
+  evaluationJobId String
+  agentVersionId  String
+  scenarioId      String
+  status          String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED, TIMED_OUT
+  durationMs      Int?
+  errorMessage    String?   @db.Text
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  evaluationJob  EvaluationJob   @relation(fields: [evaluationJobId], references: [id], onDelete: Cascade)
+  agentVersion   AgentVersion    @relation(fields: [agentVersionId], references: [id], onDelete: Cascade)
+  scenario       Scenario        @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  trace          Trace?
+  classification Classification?
+
+  @@index([evaluationJobId])
+  @@index([agentVersionId])
+  @@index([scenarioId])
+  @@index([evaluationJobId, status])
+  @@map("runs")
+}
+
+model Trace {
+  id             String   @id @default(cuid())
+  runId          String   @unique
+  messages       Json     // Array of TraceMessage: [{ role, content, toolName, toolInput, toolOutput, timestamp }]
+  turnCount      Int      @default(0)
+  hitTurnLimit   Boolean  @default(false)
+  toolCallsCount Int      @default(0)
+  rawUsage       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@map("traces")
+}
+
+model Classification {
+  id             String   @id @default(cuid())
+  runId          String   @unique
+  passFail       String   // "pass" | "fail"
+  failureType    String   // "tool_loop" | "hallucinated_confidence" | "unsafe_destructive_action" | "goal_drift" | "none"
+  confidence     Float    // 0.0 to 1.0
+  reasoning      String   @db.Text
+  rawJudgeOutput Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([passFail, failureType])
+  @@index([failureType])
+  @@map("classifications")
+}
