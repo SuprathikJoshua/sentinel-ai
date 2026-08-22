@@ -1,13 +1,13 @@
 ---
 milestone: v1.0
 version: 1.0.0
-updated: 2026-08-22T19:25:00Z
+updated: 2026-08-22T19:30:00Z
 ---
 
 # ROADMAP.md — Sentinel AI Roadmap
 
-> **Current Phase:** Phase 2: AI Engine Core
-> **Status:** Phase 1 Complete, Ready for Phase 2
+> **Current Phase:** Phase 3: Sandboxed Execution Harness & Mock Tool Executor
+> **Status:** Phase 2 Complete, Ready for Phase 3
 
 ---
 
@@ -16,10 +16,10 @@ updated: 2026-08-22T19:25:00Z
 - [x] Bun monorepo linking `/shared`, `/backend`, and `/frontend` with shared Zod types
 - [x] Supabase PostgreSQL database persistence via Prisma (`url = env("DATABASE_URL")` and `directUrl = env("DIRECT_URL")`) with Prisma 7 and `@prisma/adapter-pg`
 - [x] Supabase Auth SSR on frontend and JWT verification middleware on Express backend
-- [ ] AI Scenario Generation Engine producing realistic and adversarial test cases via Vercel AI SDK
-- [ ] Destructive Action Guardrail Probe generator testing safety under pressure and prompt injection
+- [x] AI Scenario Generation Engine producing realistic and adversarial test cases via Vercel AI SDK
+- [x] Destructive Action Guardrail Probe generator testing safety under pressure and prompt injection
 - [ ] Sandboxed Execution Harness with mock tool executor, turn cap loop, and chronological telemetry trace recording
-- [ ] LLM-as-a-Judge Failure Classifier evaluating traces into 5 taxonomy categories (`tool_loop`, `hallucinated_confidence`, `unsafe_destructive_action`, `goal_drift`, `none`)
+- [x] LLM-as-a-Judge Failure Classifier evaluating traces into 5 taxonomy categories (`tool_loop`, `hallucinated_confidence`, `unsafe_destructive_action`, `goal_drift`, `none`)
 - [ ] Reliability Scorecard & Version-over-Version Regression Tracker with visual charts
 - [ ] Next.js 15 interactive frontend (Agent editor, Trace timeline viewer, Scorecard dashboard, Report export)
 
@@ -40,15 +40,15 @@ updated: 2026-08-22T19:25:00Z
 ---
 
 ### Phase 2: AI Engine Core (Scenarios, Guardrails & Classifier)
-**Status:** ⬜ Not Started  
+**Status:** ✅ Complete  
 **Objective:** Build structured AI generation functions using Vercel AI SDK (`ai`, `@ai-sdk/anthropic`, `zod`) for scenario synthesis, destructive action guardrails, and LLM-as-a-judge classification.  
 **Requirements:** REQ-05, REQ-06, REQ-09  
 **Depends on:** Phase 1  
 
 **Plans:**
-- [ ] Plan 2.1: Implement `generateScenarios(agentConfig, count)` for realistic and adversarial scenario generation with strict Zod validation.
-- [ ] Plan 2.2: Implement `runGuardrailProbe(agentConfig)` for targeted high-risk destructive action and prompt injection probing.
-- [ ] Plan 2.3: Implement `classifyRun(trace, scenario)` with comprehensive rubric prompt, failure taxonomy categorization, and confidence scoring.
+- [x] Plan 2.1: Implement `generateScenarios(agentConfig, count)` for realistic and adversarial scenario generation with strict Zod validation.
+- [x] Plan 2.2: Implement `runGuardrailProbe(agentConfig)` for targeted high-risk destructive action and prompt injection probing.
+- [x] Plan 2.3: Implement `classifyRun(trace, scenario)` with comprehensive rubric prompt, failure taxonomy categorization, and confidence scoring.
 
 ---
 
@@ -107,7 +107,7 @@ updated: 2026-08-22T19:25:00Z
 | Phase | Status | Plans | Complete |
 |---|---|---|---|
 | 1. Foundation & Shared Architecture | ✅ | 3/3 | 100% |
-| 2. AI Engine Core | ⬜ | 0/3 | — |
+| 2. AI Engine Core | ✅ | 3/3 | 100% |
 | 3. Sandboxed Execution Harness | ⬜ | 0/2 | — |
 | 4. Backend REST API & Pipeline | ⬜ | 0/3 | — |
 | 5. Frontend UI | ⬜ | 0/3 | — |
