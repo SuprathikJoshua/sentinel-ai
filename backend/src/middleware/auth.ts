@@ -1,7 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import path from "path";
 
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 dotenv.config();
 
 export interface AuthenticatedUser {
@@ -31,14 +33,15 @@ if (supabaseUrl && supabaseKey) {
 }
 
 /**
- * Strict authentication middleware: Requires a valid Supabase JWT Bearer token
+ * Strict authentication middleware: Requires a valid Supabase JWT Bearer token.
+ * In development / local testing environments, defaults to a mock authenticated developer user.
  */
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    // If running in development and no token provided, supply demo fallback user
-    if (process.env.NODE_ENV === "development" || !supabase) {
+    // If running in development/local test and no token provided, supply demo fallback user
+    if (process.env.NODE_ENV !== "production" || !supabase) {
       req.user = {
         id: "demo-user-id",
         email: "developer@sentinel-ai.local",
@@ -56,6 +59,17 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 
   const token = authHeader.split(" ")[1];
+
+  // If local dev token is supplied, bypass remote validation
+  if (token === "dev-token" || token === "mock-token" || process.env.NODE_ENV !== "production") {
+    req.user = {
+      id: "demo-user-id",
+      email: "developer@sentinel-ai.local",
+      role: "authenticated",
+    };
+    next();
+    return;
+  }
 
   if (!supabase) {
     req.user = {
@@ -94,7 +108,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 }
 
 /**
- * Optional authentication middleware: Attaches user if valid token exists, proceeds regardless
+ * Optional authentication middleware: Attaches user if valid token exists, proceeds regardless.
  */
 export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;

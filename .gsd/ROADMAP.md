@@ -1,13 +1,13 @@
 ---
 milestone: v1.0
 version: 1.0.0
-updated: 2026-08-22T19:36:00Z
+updated: 2026-08-22T20:00:00Z
 ---
 
 # ROADMAP.md — Sentinel AI Roadmap
 
-> **Current Phase:** Phase 4: Backend REST API & Evaluation Pipeline
-> **Status:** Phase 3 Complete, Ready for Phase 4
+> **Current Phase:** Phase 5: Frontend UI (Agent Studio, Trace Viewer & Scorecard)
+> **Status:** Phase 4 Complete, Ready for Phase 5
 
 ---
 
@@ -20,6 +20,7 @@ updated: 2026-08-22T19:36:00Z
 - [x] Destructive Action Guardrail Probe generator testing safety under pressure and prompt injection
 - [x] Sandboxed Execution Harness with mock tool executor, turn cap loop, and chronological telemetry trace recording
 - [x] LLM-as-a-Judge Failure Classifier evaluating traces into 5 taxonomy categories (`tool_loop`, `hallucinated_confidence`, `unsafe_destructive_action`, `goal_drift`, `none`)
+- [x] Backend REST API with async 202 evaluation pipeline, scorecard analytics, version comparison, and markdown export
 - [ ] Reliability Scorecard & Version-over-Version Regression Tracker with visual charts
 - [ ] Next.js 15 interactive frontend (Agent editor, Trace timeline viewer, Scorecard dashboard, Report export)
 
@@ -65,15 +66,15 @@ updated: 2026-08-22T19:36:00Z
 ---
 
 ### Phase 4: Backend REST API & Evaluation Pipeline
-**Status:** ⬜ Not Started  
+**Status:** ✅ Complete  
 **Objective:** Expose complete REST API for agent management, version snapshots, evaluation execution, run inspection, scorecard analytics, and report export.  
 **Requirements:** REQ-10, REQ-11, REQ-15, REQ-16  
 **Depends on:** Phase 2, Phase 3  
 
 **Plans:**
-- [ ] Plan 4.1: Implement Agent CRUD, version snapshotting, and scenario storage routes (`/api/agents`, `/api/agents/:id/versions`, `/api/agents/:id/scenarios`).
-- [ ] Plan 4.2: Build batch evaluation orchestration endpoint (`POST /api/agents/:id/run`) executing runs asynchronously and storing traces/classifications.
-- [ ] Plan 4.3: Implement Scorecard aggregation, version comparison diffing (`GET /api/agents/:id/compare`), and markdown report export (`GET /api/agents/:id/report`).
+- [x] Plan 4.1: Implement Agent CRUD, version snapshotting, and scenario storage routes (`/api/agents`, `/api/agents/:id/versions`, `/api/agents/:id/scenarios`).
+- [x] Plan 4.2: Build batch evaluation orchestration endpoint (`POST /api/agents/:id/run`) executing runs asynchronously and storing traces/classifications.
+- [x] Plan 4.3: Implement Scorecard aggregation, version comparison diffing (`GET /api/agents/:id/compare`), and markdown report export (`GET /api/agents/:id/report`).
 
 ---
 
@@ -109,7 +110,7 @@ updated: 2026-08-22T19:36:00Z
 | 1. Foundation & Shared Architecture | ✅ | 3/3 | 100% |
 | 2. AI Engine Core | ✅ | 3/3 | 100% |
 | 3. Sandboxed Execution Harness | ✅ | 2/2 | 100% |
-| 4. Backend REST API & Pipeline | ⬜ | 0/3 | — |
+| 4. Backend REST API & Pipeline | ✅ | 3/3 | 100% |
 | 5. Frontend UI | ⬜ | 0/3 | — |
 | 6. E2E Integration & Verification | ⬜ | 0/2 | — |
 
